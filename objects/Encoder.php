@@ -1220,9 +1220,9 @@ class Encoder extends ObjectYPT
                     );
                     if (false) {
 
-                        function pnctl_strerror() {}
+                        function pnctl_strerror(int $errno): string { return ''; }
 
-                        function pnctl_get_last_error() {}
+                        function pnctl_get_last_error(): int { return 0; }
                     }
                     pcntl_exec("/bin/sh", $argv, $envp);
                     _error_log("id=(" . $this->getId() . "), " . $cmd . " failed: " . pnctl_strerror(pnctl_get_last_error()));
@@ -1292,6 +1292,7 @@ class Encoder extends ObjectYPT
             'duration' => empty($_REQUEST['duration']) ? '' : $_REQUEST['duration'],
             'title' => $title,
             'first_request' => 1,
+            'encoder_queue_id' => intval($encoder->getId()),
             'categories_id' => $categories_id,
             'format' => $format,
             'resolution' => $resolution,
@@ -1429,9 +1430,12 @@ class Encoder extends ObjectYPT
             $lockFileContent = file_get_contents($lockFile);
             $lockFileTime = intval($lockFileContent);
 
-            // If the lock file is older than 10 seconds, remove it
+            // If the lock file is older than 300 seconds, remove it.
+            // 300 s is enough headroom for a full metadata-only HTTP round-trip
+            // plus download; the previous 3 s threshold was far too short and
+            // allowed concurrent runs to slip past the guard.
             $timeOlder = time() - $lockFileTime;
-            if ($timeOlder > 3) {
+            if ($timeOlder > 300) {
                 unlink($lockFile);
             } else {
                 _error_log("Encoder::run: Lock file exists, exiting to prevent duplicate run. [$timeOlder seconds Old] $lockFile");
