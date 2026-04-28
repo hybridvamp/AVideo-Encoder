@@ -1359,6 +1359,8 @@ class Encoder extends ObjectYPT
         if (is_object($response) && !empty($response->response) && is_object($response->response)) {
             if (!empty($response->response->video_id)) {
                 $return_vars->videos_id = $response->response->video_id;
+            } elseif (!empty($response->response->videos_id)) {
+                $return_vars->videos_id = $response->response->videos_id;
             }
             if (!empty($response->response->video_id_hash)) {
                 $return_vars->video_id_hash = $response->response->video_id_hash;
@@ -2436,6 +2438,7 @@ class Encoder extends ObjectYPT
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_SAFE_UPLOAD, true);
+            curl_setopt($curl, CURLOPT_USERAGENT, getSelfUserAgent());
             // CURLOPT_FOLLOWLOCATION ensures curl follows redirects (e.g. http→https, www→non-www).
             // Without this, a redirect returns an empty body and response_raw is "".
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -2511,6 +2514,8 @@ class Encoder extends ObjectYPT
         if (!empty($encoder)) {
             if (!empty($obj->response->video_id)) {
                 $encoder->setReturn_varsVideos_id($obj->response->video_id);
+            } elseif (!empty($obj->response->videos_id)) {
+                $encoder->setReturn_varsVideos_id($obj->response->videos_id);
             }
             if (!empty($obj->response->video_id_hash)) {
                 $encoder->setReturn_varsVideo_id_hash($obj->response->video_id_hash);
